@@ -2,15 +2,27 @@ import tensorflow as tf
 import numpy as np
 from gensim.models.doc2vec import Doc2Vec
 
+# Get Action file
+with open('data/data.txt', 'r') as myfile:
+    action_str = myfile.read().splitlines()
+
 model = Doc2Vec.load("data/d2v.model")
-#get doc vectors as y_label
-y_label = model.docvecs.doctag_syn0
-#get the size of y_label
-doc_size, vec_size = np.shape(y_label)
+#get doc vectors as doc_vectors
+doc_vectors = model.docvecs.doctag_syn0
+
+#get x_train from user_train
+with open('data/user_train.txt', 'r') as myfile:
+    user_train = myfile.read().splitlines()
+    # get emotion probabilities
+    x_train = [eval(s.split(':')[0]) for s in user_train]
+    # get position of string in data.txt, then find the respective vectors
+    y_label = [doc_vectors[action_str.index(
+        s.split(':')[1])] for s in user_train]
+
 #num of probability emotion as input
-inp_size = 10
-#set temporary x_train
-x_train = np.random.rand(doc_size, inp_size)
+doc_size, inp_size = np.shape(x_train)
+#get the size of training lists
+doc_size, vec_size = np.shape(y_label)
 
 #start of tensor flow
 x = tf.placeholder(tf.float32, shape=(1, inp_size))

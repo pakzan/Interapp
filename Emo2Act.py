@@ -2,9 +2,11 @@ import tensorflow as tf
 import numpy as np
 from gensim.models.doc2vec import Doc2Vec
 import time
+import os
 # UI module
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import messagebox
 
 # own module
 import EmoVoice
@@ -55,21 +57,23 @@ def updateProgBar():
     # update all progress bars
     for i in range(len(emoList)):
         prog_dif = emoVoiceProb[i] - prog_var[i].get()
-        prog_var[i].set(prog_var[i].get() + prog_dif / 20)
+        prog_var[i].set(prog_var[i].get() + prog_dif / 30)
         total_prog_dif += prog_dif
     #if no update done(finished update), return false
     return round(total_prog_dif) != 0
 
+# number of actions to show in UI
+actionNo = 3
 #global variables for main()
 last_action = time.time()
 emoVoiceProb = [0] * 5
+x_inp = [0] * inp_size
 # main loop
 def main():
-    global last_action, emoVoiceProb
+    global last_action, emoVoiceProb, x_inp
 
     # get emotion Probabilities after progress bar done animate
     # update progress bar value
-    # 1 second animation
     if not updateProgBar():
         # voiceProb = [neutrality, happiness, sadness, anger, fear]
         try:
@@ -90,35 +94,36 @@ def main():
         #find the most similiar doc vectors
         similar_doc = model.docvecs.most_similar(_pred)
         # print(similar_doc)
-
-        #open file to get action
-        with open('data/data.txt', 'r') as myfile:
-            data = myfile.read().splitlines()
-        actions = ''
-        for i in range(3):
+            
+        for i in range(actionNo):
             action_ind = int(similar_doc[i][0])
-            actions += data[action_ind] + '\n'
+            act_text[i].set(data[action_ind])
+            #set dont size according to confidence
+            font_sz = max(10, round(40 * (similar_doc[i][1] - .6)))
+            act_label[i].config(font=("Helvetica", font_sz))
 
         # update action label text
-        act_text.set(actions)
         last_action = time.time()
 
     # proceed next loop
     root.after(20, main)
-    
-
-def getVoiceFaceEmo(qVoice):
-    while (True):
-        qVoice.put(EmoVoice.GetVoiceEmo())
 
 # Thread for getting voice and face emotions
 import threading
 import queue
 
+def getVoiceFaceEmo(qVoice):
+    while (True):
+        qVoice.put(EmoVoice.GetVoiceEmo())
 qVoice = queue.Queue()
 thread = threading.Thread(target=getVoiceFaceEmo,
                           name=getVoiceFaceEmo, args=(qVoice,))
 thread.start()
+# End Thread
+
+# Get Action file
+with open('data/data.txt', 'r') as myfile:
+    data = myfile.read().splitlines()
 
 # Tkinter
 root = tk.Tk()
@@ -127,9 +132,9 @@ frame = tk.Frame(root)
 frame.grid()
 # Frame elements
 #-----------------------------------EMOTION PROGRESS BARS
-emoList = ['neutrality', 'happiness', 'sadness', 'anger', 'fear']
+emoList = ['Neutrality', 'Happiness', 'Sadness', 'Anger', 'Fear']
 
-start_h = 2
+start_h = 0
 prog_var = [None] * len(emoList)
 for i, emoName in enumerate(emoList):
     # set progress variable for further modification
@@ -139,18 +144,60 @@ for i, emoName in enumerate(emoList):
     ttk.Progressbar(frame, length=300, maximum=1, variable=prog_var[i]).grid(row=i+start_h, column=2)
 #-----------------------------------EMOTION PROGRESS BARS END
 
-#-----------------------------------ACTIONS LABEL
-# set action variable for further modification
-act_text = tk.StringVar()
-# set label and progress bar UI
-act_label = tk.Label(root, textvariable=act_text)
-#-----------------------------------ACTIONS LABEL END
+#-----------------------------------ACTIONS LABEL AND BUTTON
+start_h = len(emoList)
+act_text = [None] * actionNo
+act_label = [None] * actionNo
+for i in range(actionNo):
+    # set progress variable for further modification
+    act_text[i] = tk.StringVar()
+    # set action label UI
+    act_label[i] = ttk.Label(frame, textvariable=act_text[i])
+    act_label[i].grid(row=i + start_h, column=2)
+
+    # set action button UI
+    ttk.Button(frame, text='Helpful', command=lambda i=i: train(i)).grid(row=i+start_h, column=1)
+#-----------------------------------ACTIONS LABEL AND BUTTON END
 
 frame.pack(padx=20, pady=20)
-act_label.pack()
 
-# call UI every 0.1s
+
+#------------------------------------UPDATE SESSION
+#update response for further machine learning
+user_train = open("data/user_train.txt", "a")
+def train(actionNo):
+    global user_train, hasUpdate
+    rounded_x = [float("%.2f" % e) for e in x_inp]
+    user_train.write(str(rounded_x) + ':' + data[actionNo] + '\n')
+    hasUpdate = True
+
+# Prompt for update
+hasUpdate = False
+if os.path.exists("data/hasUpdate.txt"):
+    if tk.messagebox.askquestion('Update', "New update available! Update?") == 'yes':
+        import Emo2Act_train
+        tk.messagebox.showinfo('Done', 'Update Successfully')
+        os.remove("data/hasUpdate.txt")
+    else:
+       hasUpdate = True
+       
+# Close Tkinter event
+def on_closing():
+    global user_train, hasUpdate
+    user_train.close()
+    if hasUpdate:
+        if tk.messagebox.askquestion('Update', "New update available! Update?") == 'yes':
+            import Emo2Act_train
+            tk.messagebox.showinfo('Done', 'Update Successfully')
+        else:
+            open("data/hasUpdate.txt", 'a').close()
+
+    root.destroy()
+#------------------------------------UPDATE SESSION END
+
+root.protocol("WM_DELETE_WINDOW", on_closing)
+
+# call UI every 0.001s
+root.title("Interapp")
 root.after(1, main)
 root.mainloop()
-
-# EmoVoice.Destroy()

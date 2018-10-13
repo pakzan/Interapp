@@ -63,6 +63,8 @@ def GetVoiceEmo():
     # get probabilities
     voice.extract(quality, emoProb)
 
+    # destroy voice before return value
+    voice.destroy()
     if quality.valid:
         return [emoProb.neutrality, emoProb.happiness, emoProb.sadness, emoProb.anger, emoProb.fear]
         print ("Neutral: %.3f" % emoProb.neutrality)
@@ -74,6 +76,3 @@ def GetVoiceEmo():
         return [0,0,0,0,0]
         print("Not enough sonorancy to determine emotions")
     print()
-
-def Destroy():
-    voice.destroy()
