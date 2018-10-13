@@ -18,7 +18,6 @@ last_time = time.time()
 
 #img here
 hwnd = win32gui.FindWindow(None, r'YouTube - Google Chrome')
-print (hwnd)
 win32gui.SetForegroundWindow(hwnd)
 dimensions = win32gui.GetWindowRect(hwnd)
 
@@ -30,9 +29,8 @@ model.predict(image)
 cv2.imshow("the screen got", image)
 
 print("fps: {0}".format(1 / (time.time() - last_time)))
-
+cv2.waitKey(0)
 # Press "q" to quit
 if cv2.waitKey(25) & 0xFF == ord("q"):
     cv2.destroyAllWindows()
     # break
-    

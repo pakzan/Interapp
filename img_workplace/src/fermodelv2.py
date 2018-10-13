@@ -123,8 +123,8 @@ class FERModel:
         model_indices = [self.emotion_index_map[emotion] for emotion in self.target_emotions]
         sorted_indices = [str(idx) for idx in sorted(model_indices)]
         model_suffix = ''.join(sorted_indices)
-        model_file = '../models/conv_model_%s.hdf5' % model_suffix
-        emotion_map_file = '../models/conv_emotion_map_%s.json' % model_suffix
+        model_file = './models/conv_model_%s.hdf5' % model_suffix
+        emotion_map_file = './models/conv_emotion_map_%s.json' % model_suffix
         emotion_map = json.loads(open(emotion_map_file).read())
         return load_model(model_file), emotion_map
 
