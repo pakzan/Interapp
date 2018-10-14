@@ -2,6 +2,7 @@ import sys
 sys.path.append('../')
 import time
 import numpy as np
+import numpy
 import cv2
 from PIL import ImageGrab
 import win32gui
@@ -9,7 +10,7 @@ import win32com.client
 from src.fermodelv2 import FERModel
 
 import PIL.Image
-PIL.Image.MAX_IMAGE_PIXELS = 933120000
+PIL.Image.MAX_IMAGE_PIXELS = None
 #start
 
 cascPath = "./src/haarcascade_frontalface_default.xml"
@@ -36,16 +37,16 @@ def find_windows_dimension_from_hwnd(hwnd):
 
 # cut away top bar
 
-isFirst = False
+isDebug = False
 def predict_screen_from_dimension(dimensions, isShowFps = False):
     last_time = time.time()
 
     image = ImageGrab.grab(dimensions)
     image = image.convert('RGB')
     image = np.array(image)
-    if type(image) != np.ndarray:
-        image = image.astype(np.uint8)
-    predictions = model.predict(image, isFirst)
+    # if window is open(dimention > 0)
+    image = image.astype(np.uint8)
+    predictions = model.predict(image, isDebug)
 
     #showing fps for debug purposes
     if isShowFps == True:
