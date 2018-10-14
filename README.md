@@ -41,6 +41,17 @@ Some of the action suggestion including
 ![Combined rseult of emotional analysis along with feedback function](/readme_doc/gui_action.png "Combined rseult of emotional analysis along with feedback function")  
 
 Lastly, having the ability to capture image and sound of any program on computer, the program is not restricted on solely video call, but there is a vast possibility of it is capable of.
+
+## File details
+1. doc2vec.py: Vectorise predefined actions.
+2. EmoVoice.py: Analyse audio output and extimate the voice sentiment
+3. func_winsgrab.py: Analyse image output and extimate the face sentiment
+4. Emo2Act.py: Analyse voice and face sentiment and suggest suitable actions
+5. Emo2Act_train.py: Train the "Emotions to Actions" model
+
+## Run instruction
+1. Clone the whole project
+2. Run Emo2Act.py
 # Warps things up
 Interapp would like to express our gratitude toward these awesome packages that make this project possible
 
