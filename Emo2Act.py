@@ -111,7 +111,7 @@ def main():
             action_ind = int(similar_doc[i][0])
             act_text[i].set(data[action_ind])
             #set dont size according to confidence
-            font_sz = max(10, round(40 * (similar_doc[i][1])))
+            font_sz = max(6, round(20 * (1 + similar_doc[i][1])))
             act_label[i].config(font=("Helvetica", font_sz))
 
         # update action label text
@@ -139,9 +139,11 @@ def getFaceEmo(qFace):
         emoFace = func_winsgrab.predict_screen_from_dimension(win_dimen)
         # if emo face contains multiple value, then average emo face and voice
         if isinstance(emoFace[0], list):
-            emoFace_avg = np.array(np.mean(emoFace, axis=0)).tolist()
+            mean = np.mean(emoFace, axis=0)
+            divide = np.divide(mean, 100)
+            emoFace_avg = np.array(divide).tolist()
         else:
-            emoFace_avg = emoFace
+            emoFace_avg = np.array(np.divide(emoFace, 100)).tolist()
         qFace.put(emoFace_avg)
 
 qVoice = queue.Queue()
@@ -188,7 +190,8 @@ popupMenu.grid(row=1, column=2)
 # on change dropdown value
 def change_dropdown(*args):
     global win_dimen
-    win_dimen = func_winsgrab.find_windows_dimension_from_hwnd(win_dics[win_op_var.get()])
+    win_dimen = func_winsgrab.find_windows_dimension_from_hwnd(
+        win_dics[win_op_var.get()])
 
 # link function to change dropdown
 win_op_var.trace('w', change_dropdown)
@@ -227,10 +230,12 @@ frame3.pack(padx=10, pady=10)
 
 #--------------------------------------------------FOREGROUND CHECKBUTTON
 def debugMode():
-    func_winsgrab.isFirst = bool(isDebug.get())
+    func_winsgrab.isDebug = bool(isDebug.get())
+    if not func_winsgrab.isDebug:
+        cv2.destroyWindow("captured image")
 
 isDebug = tk.IntVar()
-debug_cb = tk.Checkbutton(root, text="Always on foreground",
+debug_cb = tk.Checkbutton(root, text="View Analysed Screen",
     variable=isDebug,
     command=debugMode)
 debug_cb.pack()
