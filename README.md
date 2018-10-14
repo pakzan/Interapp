@@ -26,7 +26,7 @@ By doing short-time Fourier Transform (STFT), we are able to obtain the intensit
 In our project, this is assisted by the library OpenVokaturi.
 
 ## Action Suggestion (Reinforcement Learning using TensorFlow)
-By using the output from image and voice analysis, a Neural Network model with 128 hidden layers is self-trained. During the prototyping stage, user will get suggestion for action during the conversation in video call, eg. "Change topics", "Pay Attention!", etc. Then, user can rate its usefulness relate with the actual situation. The data will be submitted back to the program to further train the model at the end of the conversation so that the program will be even smarter. 
+By using the output from image and voice analysis, a Neural Network model with 128 hidden nodes and 2 hidden layers is self-trained. During the prototyping stage, user will get suggestion for action during the conversation in video call, eg. "Change topics", "Pay Attention!", etc. Then, user can rate its usefulness relate with the actual situation. The data will be submitted back to the program to further train the model at the end of the conversation so that the program will be even smarter. 
 
 Some of the action suggestion including
 - `change topic`
