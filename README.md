@@ -16,12 +16,14 @@ Although one always say he is deep with hiding their feeling, but almost everyon
 
 The result of the classifier which constist of different percentage of similarity of each emotion is transfer to the action suggestion model for further training. 
 
+![Labeled emotion analysis image output](/readme_doc/label_sc.png "Labeled emotion analysis image output")  
+
 ## Voice (Real-time Speech Emotion Recognizer)
 Speech Emotion or voice sentiment is also a hot topics with a lot of past research working on it. People tend to speak with increasing frequency when they are happy or interested, while talking in normalized pitch when they got bored. Although talking in different language and word, the base frequency of the speech is highly corelate to the speaker mood and emotion. 
 
 By doing short-time Fourier Transform (STFT), we are able to obtain the intensity of frequency versus short time chart. This is particularly useful becuase it enable researcher to treat it as a 2D data classifiation problem after signal processing. 
 
-In our project, this is assisted by the library Emovoice.
+In our project, this is assisted by the library OpenVokaturi.
 
 ## Action Suggestion (Reinforcement Learning using TensorFlow)
 By using the output from image and voice analysis, a Neural Network model with 128 hidden layers is self-trained. During the prototyping stage, user will get suggestion for action during the conversation in video call, eg. "Change topics", "Pay Attention!", etc. Then, user can rate its usefulness relate with the actual situation. The data will be submitted back to the program to further train the model at the end of the conversation so that the program will be even smarter. 
@@ -36,10 +38,12 @@ Some of the action suggestion including
 - `ask questions`
 - `pay attention`
 
+![Combined rseult of emotional analysis along with feedback function](/readme_doc/gui_action.png "Combined rseult of emotional analysis along with feedback function")  
+
 Lastly, having the ability to capture image and sound of any program on computer, the program is not restricted on solely video call, but there is a vast possibility of it is capable of.
 # Warps things up
 Interapp would like to express our gratitude toward these awesome packages that make this project possible
 
 - [Emopy](https://github.com/thoughtworksarts/EmoPy) -- A deep neural net toolkit for emotion analysis via Facial Expression Recognition (FER) by thoughtworksarts
-- [Emovoice](https://github.com/hcmlab/emovoice) --Real-time Speech Emotion Recognizer by hcmlab
+- [Vokaturi](https://developers.vokaturi.com/downloads/sdk) --understand the emotion in a speaker’s voice
 - [TensorFlow](https://www.tensorflow.org/tutorials/) --An open source machine learning framework for everyone
