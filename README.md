@@ -43,18 +43,34 @@ Some of the action suggestion including
 Lastly, having the ability to capture image and sound of any program on computer, the program is not restricted on solely video call, but there is a vast possibility of it is capable of.
 
 ## File details
+1. constant.py: All neccessary constants
 1. doc2vec.py: Vectorise predefined actions.
-2. EmoVoice.py: Analyse audio output and extimate the voice sentiment
-3. func_winsgrab.py: Analyse image output and extimate the face sentiment
-4. Emo2Act.py: Analyse voice and face sentiment and suggest suitable actions
-5. Emo2Act_train.py: Train the "Emotions to Actions" model
+1. voice2emo.py: Analyse audio output and extimate the voice sentiment
+1. face2emo.py: Analyse image output and extimate the face sentiment
+1. emo2act.py: Train the "Emotions to Actions" model
+1. main.py: Analyse voice and face sentiment and suggest suitable actions
+
+The prediction flow is: main.py -> face2emo.py & voice2emo.py -> emo2act.py -> doc2vec.py -> output actions
+
+## Environment
+- Windows 10
+- Python 3.6.6
 
 ## Run instruction
-1. Clone the whole project
-2. Run Emo2Act.py
+1. Clone the project
+1. Run `pip install requirements.txt`
+1. If you install nltk for the first time: 
+    ```
+    import nltk
+    nltk.download('punkt')
+    ```
+1. If you change the `ACTIONS` in constant.py, Run `python doc2vec.py` to update d2v.model
+1. Run `python main.py`
+
 # Warps things up
 Interapp would like to express our gratitude toward these awesome packages that make this project possible
 
 - [Emopy](https://github.com/thoughtworksarts/EmoPy) -- A deep neural net toolkit for emotion analysis via Facial Expression Recognition (FER) by thoughtworksarts
-- [Vokaturi](https://developers.vokaturi.com/downloads/sdk) --understand the emotion in a speaker’s voice
-- [TensorFlow](https://www.tensorflow.org/tutorials/) --An open source machine learning framework for everyone
+- [Vokaturi](https://developers.vokaturi.com/) --understand the emotion in a speaker’s voice
+- [TensorFlow](https://www.tensorflow.org/) --An open source machine learning framework for everyone
+- [Keras](https://keras.io/) --An open-source software library that provides a Python interface for artificial neural networks.

@@ -7,9 +7,6 @@ import numpy as np
 import json
 import tensorflow as tf
 
-import win32gui
-import win32com.client
-
 class FERModel:
     """
     Pretrained deep learning model for facial expression recognition.
@@ -65,21 +62,19 @@ class FERModel:
         image = misc.imread(image_file)
         self.predict(image)
 
-    def predict(self, image, isDebug=False):
+    def predict(self, image, debug=False):
         """
         Predicts discrete emotion for given image.
 
         :param images: image file (jpg or png format)
         """
-        predictions = []
+        preds = []
         gray_image = image
         #image.shape format height, width, channels, so if exist channels, change to gray
-        print (image.shape)
-        print (len(image.shape))
         if len(image.shape) > 2: 
             gray_image = cv2.cvtColor(image, code=cv2.COLOR_BGR2GRAY)
-        #capture out the face
-        # Equalize the histogram
+            # capture out the face
+            # Equalize the histogram
             cv2.equalizeHist(gray_image, gray_image)
             faces = self.faceCascade.detectMultiScale(
                 gray_image,
@@ -87,61 +82,40 @@ class FERModel:
                 minNeighbors=5,
                 minSize=(30, 30)
             )
-            #cv2.imshow("hello", cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-            
-            if len(faces):
-                #window offset
-                a = image.shape
-                winOffset = image.shape[1] - 20
+            #for printing font
+            fontface = cv2.FONT_HERSHEY_SIMPLEX
+            scale = 1
 
-                print("Found {0} faces!".format(len(faces)))
-                #for printing font
-                fontface = cv2.FONT_HERSHEY_SIMPLEX
-                scale = 1
+            #for return value
+            for (x, y, w, h) in faces:
+                cropped = gray_image[y:y+h, x:x+w]
+                #cv2.imshow("Faces cropped", cropped)
+                resized_image = cv2.resize(cropped, self.target_dimensions, interpolation=cv2.INTER_LINEAR)
+                final_image = np.array([np.array([resized_image]).reshape(list(self.target_dimensions)+[self.channels])])
+                with graph.as_default():
+                    pred = self.model.predict(final_image)[0]
 
-                #for return value
-                for (x, y, w, h) in faces:
-                    cropped = gray_image[y:y+h, x:x+w]
-                    #cv2.imshow("Faces cropped", cropped)
-                    resized_image = cv2.resize(cropped, self.target_dimensions, interpolation=cv2.INTER_LINEAR)
-                    final_image = np.array([np.array([resized_image]).reshape(list(self.target_dimensions)+[self.channels])])
-                    with graph.as_default():
-                        prediction = self.model.predict(final_image)
-                        print(prediction)
-                        prediction = prediction[0]
-                        #self._print_prediction(prediction[0])
+                    normalized_pred = [x/sum(pred) for x in pred]
+                    preds.append(normalized_pred)
 
-                        #self defined function of output.
-                        #self._self_edit_print_image(cv2.cvtColor(image, cv2.COLOR_BGR2RGB), faces, prediction[0])
-
-                        normalized_prediction = [x/sum(prediction) for x in prediction]
+                    if debug:
                         for emotion in self.emotion_map.keys():
-                            print('%s: %.1f%%' % (emotion, normalized_prediction[self.emotion_map[emotion]]*100))
-                        dominant_emotion_index = np.argmax(prediction)
+                            print('%s: %.1f%%' % (emotion, normalized_pred[self.emotion_map[emotion]]*100))
+                        dominant_emotion_i = np.argmax(pred)
                         for emotion in self.emotion_map.keys():
-                            if dominant_emotion_index == self.emotion_map[emotion]:
+                            if dominant_emotion_i == self.emotion_map[emotion]:
                                 dominant_emotion = emotion
                                 break
                         print('Dominant emotion: %s' % dominant_emotion)
                         print()
+
                         # Draw a rectangle around the faces
-                        
                         cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                        myText = "%s: %.1f%%" % (dominant_emotion, normalized_prediction[dominant_emotion_index]*100)
-                        cv2.putText(image, myText, (x, y + h + 20), fontface, scale, (0, 255, 0), 1)
-                        predictions.append([i * 100 for i in normalized_prediction])
-        # else:
-            # print ("current image dont have any face")
-                if isDebug == True:
-                    cv2.imshow("captured image", cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-                    # cv2.moveWindow("captured image", winOffset, 0)
-                    # imshowHwnd = win32gui.FindWindow(None, r'captured image')
-                    # shell = win32com.client.Dispatch("WScript.Shell")
-                    # shell.SendKeys('%')
-            # win32gui.SetForegroundWindow(imshowHwnd)
-            # imshowHwnd = win32gui.FindWindow(None, r'Interapp')
-            # win32gui.SetForegroundWindow(imshowHwnd)
-        return predictions
+                        text = "%s: %.1f%%" % (dominant_emotion, normalized_pred[dominant_emotion_i]*100)
+                        cv2.putText(image, text, (x, y + h + 20), fontface, scale, (0, 255, 0), 1)
+            if debug:
+                cv2.imshow("captured image", cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        return preds
 
             
 

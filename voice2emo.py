@@ -14,16 +14,14 @@
 #	Angry: 0.001
 #	Fear: 0.000
 
-import sys
 import pyaudio
 import numpy as np
+from constant import EMPTY_VOICE_PROB
+from vokaturi.api import Vokaturi
 
-sys.path.append("/OpenVokaturi/api")
-import Vokaturi
+Vokaturi.load("Vokaturi/lib/Vokaturi_win64.dll")
 
-Vokaturi.load("/OpenVokaturi/lib/open/win/OpenVokaturi-3-0-win64.dll")
-
-CHUNKSIZE = 100000  # fixed chunk size
+chunksize = 100000  # fixed chunk size
 sample_rate = 44100
 
 # initialize portaudio
@@ -37,14 +35,14 @@ stream = p.open(format=pyaudio.paInt16,
                 channels=channelcount,
                 rate=int(device_info["defaultSampleRate"]),
                 input=True,
-                frames_per_buffer=CHUNKSIZE,
+                frames_per_buffer=chunksize,
                 input_device_index=device_info["index"])
 
 #stream = p.open(format=pyaudio.paInt16, channels=1, rate=sample_rate, input=True, frames_per_buffer=CHUNKSIZE)
 
-def GetVoiceEmo():
+def pred_voice():
     # get fresh samples
-    data = stream.read(CHUNKSIZE)
+    data = stream.read(chunksize)
     samples = np.fromstring(data, dtype=np.int16)
 
     buffer_length = len(samples)
@@ -52,7 +50,7 @@ def GetVoiceEmo():
     if samples.ndim == 1:  # mono
         c_buffer[:] = samples[:] / 32768.0
     else:  # stereo
-        c_buffer[:] = 0.5*(samples[:,0]+0.0+samples[:,1]) / 32768.0
+        c_buffer[:] = 0.5*(samples[:,0]+samples[:,1]) / 32768.0
 
     # initialise voice with sample rate and size
     voice = Vokaturi.Voice(sample_rate, buffer_length)
@@ -66,13 +64,6 @@ def GetVoiceEmo():
     # destroy voice before return value
     voice.destroy()
     if quality.valid:
-        return [emoProb.neutrality, emoProb.happiness, emoProb.sadness, emoProb.anger, emoProb.fear]
-        print ("Neutral: %.3f" % emoProb.neutrality)
-        print ("Happy: %.3f" % emoProb.happiness)
-        print ("Sad: %.3f" % emoProb.sadness)
-        print("Angry: %.3f" % emoProb.anger)
-        print ("Fear: %.3f" % emoProb.fear)
+        return (emoProb.neutrality, emoProb.happiness, emoProb.sadness, emoProb.anger, emoProb.fear)
     else:
-        return [0,0,0,0,0]
-        print("Not enough sonorancy to determine emotions")
-    print()
+        return EMPTY_VOICE_PROB
